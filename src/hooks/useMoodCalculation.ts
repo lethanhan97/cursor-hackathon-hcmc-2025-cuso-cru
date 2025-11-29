@@ -29,7 +29,7 @@ type MoodCalculationResult = {
   sfx?: Sfx;
 };
 
-type Sfx = "crazy" | "party" | "boom";
+type Sfx = "crazy" | "party" | "boom" | "fail" | "hello";
 
 const SFX_WORDS_THRESHOLD = 1;
 
@@ -140,6 +140,16 @@ function calculateSfx(transcript: string): Sfx | undefined {
   const boomKeywords = ["boom", "awesome"];
   if (boomKeywords.some((keyword) => lastNwords.includes(keyword))) {
     return "boom";
+  }
+
+  const failKeywords = ["fail", "bad", "terrible"];
+  if (failKeywords.some((keyword) => lastNwords.includes(keyword))) {
+    return "fail";
+  }
+
+  const helloKeywords = ["hello", "hi", "hey"];
+  if (helloKeywords.some((keyword) => lastNwords.includes(keyword))) {
+    return "hello";
   }
 
   return undefined;
