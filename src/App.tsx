@@ -35,6 +35,7 @@ function App() {
   >(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const sfxRef = useRef<HTMLAudioElement>(null);
   const moodIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const moodHistoryRef = useRef<Mood[]>([]);
   const recentMoodsRef = useRef<Mood[]>([]);
@@ -80,6 +81,7 @@ function App() {
       {
         detections,
         voiceScore,
+        transcript: currentTranscript,
         recentMoods: recentMoodsRef.current,
         windowSize: MOOD_WINDOW_SIZE,
       },
@@ -98,8 +100,28 @@ function App() {
 
     // Update audio if mood should change
     if (result.shouldUpdate && result.smoothedMood !== currentMood) {
+      if (result.sfx) {
+        if (sfxRef.current && audioRef.current) {
+          sfxRef.current.src = `/sfx/${result.sfx}.mp3`;
+          audioRef.current.volume = 0.2;
+          sfxRef.current.volume = 0.8; // Set SFX volume to be audible over background
+          sfxRef.current.loop = false; // Ensure SFX doesn't loop
+          sfxRef.current.play().catch((error) => {
+            console.error("Error playing SFX:", error);
+          });
+
+          setTimeout(() => {
+            if (sfxRef.current && audioRef.current) {
+              sfxRef.current.pause();
+              sfxRef.current.currentTime = 0; // Reset to beginning
+              audioRef.current.volume = 0.5;
+            }
+          }, 10_000);
+        }
+      }
       if (audioRef.current) {
         audioRef.current.src = `/sounds/${result.smoothedMood}.mp3`;
+        audioRef.current.volume = 0.5; // Lower background music volume to make SFX more audible
         audioRef.current.play().catch((error) => {
           console.error("Error playing audio:", error);
         });
@@ -195,6 +217,9 @@ function App() {
       </button>
       {scribe.partialTranscript && <p>Live: {scribe.partialTranscript}</p>}
       <audio ref={audioRef} loop>
+        <source type="audio/mpeg" />
+      </audio>
+      <audio ref={sfxRef}>
         <source type="audio/mpeg" />
       </audio>
     </section>

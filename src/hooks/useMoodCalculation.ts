@@ -16,6 +16,7 @@ type FaceDetectionWithExpressions = {
 type MoodCalculationInput = {
   detections: FaceDetectionWithExpressions[] | null;
   voiceScore: number; // Range: -5 to 5
+  transcript: string;
   recentMoods: Mood[];
   windowSize: number;
 };
@@ -25,7 +26,10 @@ type MoodCalculationResult = {
   smoothedMood: Mood;
   moodCount: number;
   shouldUpdate: boolean;
+  sfx?: "yeaboi";
 };
+
+const SFX_WORDS_THRESHOLD = 3;
 
 // Pure function to calculate mood from face detections and voice score
 function calculateMoodFromInputs(
@@ -117,6 +121,17 @@ function calculateMoodFromInputs(
   return finalMood;
 }
 
+function calculateSfx(transcript: string): "yeaboi" | undefined {
+  const lastNwords = transcript
+    .split(" ")
+    .slice(-SFX_WORDS_THRESHOLD)
+    .join(" ");
+  if (lastNwords.includes("yea")) {
+    return "yeaboi";
+  }
+  return undefined;
+}
+
 // Pure function to smooth moods using sliding window
 function smoothMood(
   calculatedMood: Mood,
@@ -163,6 +178,7 @@ export function calculateMood(
 
   // Calculate mood from face and voice
   const calculatedMood = calculateMoodFromInputs(typedDetections, voiceScore);
+  const sfx = calculateSfx(input.transcript);
 
   // Add to recent moods window (this is handled outside as it's state)
   const updatedRecentMoods = [...recentMoods, calculatedMood].slice(
@@ -184,5 +200,6 @@ export function calculateMood(
     smoothedMood,
     moodCount,
     shouldUpdate,
+    sfx,
   };
 }
