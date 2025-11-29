@@ -13,7 +13,7 @@ app.use(
   })
 );
 
-const ELEVENLABS_API_KEY = "hehe you wish";
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || "hehe you wish";
 
 app.get("/scribe-token", async (c) => {
   const response = await fetch(
