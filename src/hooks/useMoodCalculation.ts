@@ -26,10 +26,12 @@ type MoodCalculationResult = {
   smoothedMood: Mood;
   moodCount: number;
   shouldUpdate: boolean;
-  sfx?: "yeaboi";
+  sfx?: Sfx;
 };
 
-const SFX_WORDS_THRESHOLD = 3;
+type Sfx = "crazy" | "party" | "boom";
+
+const SFX_WORDS_THRESHOLD = 1;
 
 // Pure function to calculate mood from face detections and voice score
 function calculateMoodFromInputs(
@@ -121,14 +123,25 @@ function calculateMoodFromInputs(
   return finalMood;
 }
 
-function calculateSfx(transcript: string): "yeaboi" | undefined {
+function calculateSfx(transcript: string): Sfx | undefined {
   const lastNwords = transcript
     .split(" ")
     .slice(-SFX_WORDS_THRESHOLD)
     .join(" ");
-  if (lastNwords.includes("yea")) {
-    return "yeaboi";
+
+  if (lastNwords.includes("crazy")) {
+    return "crazy";
   }
+
+  if (lastNwords.includes("party")) {
+    return "party";
+  }
+
+  const boomKeywords = ["boom", "awesome"];
+  if (boomKeywords.some((keyword) => lastNwords.includes(keyword))) {
+    return "boom";
+  }
+
   return undefined;
 }
 
