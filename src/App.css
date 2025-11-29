@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+
+.preview {
+  height: 60vh;
+  background-color: wheat;
+  position: relative;
+  width: 100%;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
