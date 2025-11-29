@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import "./App.css";
 import * as faceapi from "@vladmandic/face-api";
+import { useAutoTranscription } from "./hooks/useAutoTranscription";
 
 await faceapi.nets.ssdMobilenetv1.loadFromUri("/model");
 await faceapi.nets.faceExpressionNet.loadFromUri("/model");
@@ -23,6 +24,8 @@ function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const moodIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const moodHistoryRef = useRef<Mood[]>([]);
+  const { startTranscribing, stopTranscribing, scribe } =
+    useAutoTranscription();
 
   const [mood, setMood] = useState<Mood | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -65,6 +68,7 @@ function App() {
       video: true,
       audio: true,
     });
+    await startTranscribing();
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = media;
@@ -74,6 +78,7 @@ function App() {
     moodIntervalRef.current = setInterval(handleMoodChange, INTERVAL);
   };
   const stop = async () => {
+    stopTranscribing();
     if (localVideoRef.current && localVideoRef.current.srcObject) {
       const stream = localVideoRef.current.srcObject;
       const tracks = stream.getTracks();
@@ -117,9 +122,11 @@ function App() {
       <button onClick={toggle}>
         {isStreaming ? "Stop Streaming" : "Start Streaming"}
       </button>
-      <audio ref={audioRef} loop>
+      {scribe.partialTranscript && <p>Live: {scribe.partialTranscript}</p>}
+      {/* Temporarily disabled audio so it s not too noisy at venue */}
+      {/* <audio ref={audioRef} loop>
         <source type="audio/mpeg" />
-      </audio>
+      </audio> */}
     </section>
   );
 }
