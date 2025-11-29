@@ -117,7 +117,11 @@ function App() {
       audio: true,
     });
 
-    await startTranscribing();
+    try {
+      await startTranscribing();
+    } catch (error) {
+      console.error("Error starting transcription:", error);
+    }
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = media;
